@@ -22,4 +22,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-app.Run(); 
+app.Run();
+
+// Make the Program class public for integration tests
+public partial class Program { } 
