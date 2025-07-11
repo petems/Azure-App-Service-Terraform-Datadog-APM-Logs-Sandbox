@@ -347,3 +347,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd 
+
+# Terraform related ignores
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
