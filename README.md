@@ -60,3 +60,47 @@ terraform apply
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). 
+
+# Application using manual instrumentation
+
+This sample web application shows how to manually instrument an ASP.NET Core application using Datadog .NET APM library.
+
+## Build and Testing
+
+This project includes automated testing and continuous integration:
+
+### Unit Tests
+
+The project includes a comprehensive test suite located in `dotnetcoresample.Tests/` that covers:
+
+- Page model functionality (Index and Privacy pages)
+- Constructor validation
+- Method execution testing
+- Basic framework verification
+
+To run tests locally:
+```bash
+dotnet test
+```
+
+### GitHub Actions Workflow
+
+The repository includes a GitHub Actions workflow (`.github/workflows/main.yml`) that:
+
+1. **Test Job**: Runs all unit tests with code coverage collection
+2. **Build Job**: Compiles the application in Release mode (only runs if tests pass)
+3. **Deploy Job**: Deploys to Azure Web App (only runs if build succeeds)
+
+The workflow ensures that:
+- All tests must pass before deployment
+- Code coverage is collected and artifacts are uploaded
+- Failed tests prevent deployment to production
+
+### Test Structure
+
+The test project uses:
+- **xUnit** as the testing framework
+- **Microsoft.AspNetCore.Mvc.Testing** for ASP.NET Core integration testing
+- **Microsoft.Extensions.DependencyInjection** for dependency injection in tests
+
+Tests are automatically discovered and run by the test runner and include proper dependency injection setup for testing ASP.NET Core components. 
