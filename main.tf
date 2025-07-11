@@ -13,6 +13,13 @@ terraform {
   required_version = ">= 1.0.0"
 }
 
+# Variable for the resource group name
+variable "resource_group_name" {
+  description = "Name of the existing Azure resource group"
+  type        = string
+  default     = "petems-azureapp-dotnet-sandbox"
+}
+
 provider "azurerm" {
   features {}
 }
@@ -23,18 +30,9 @@ resource "random_integer" "ri" {
   max = 99999
 }
 
-# Create the resource group (if in your own Azure account)
-# This is not needed if you are using the Datadog sandbox repo
-# However it switches all the logic to use data instead of a created resource
-# So for now, we'll lookup the existing resource group
-# resource "azurerm_resource_group" "rg" {
-#   name     = "myResourceGroup-${random_integer.ri.result}"
-#   location = "eastus"
-# }
-
 # Use the existing default eastus resource group (using the Datadog sandbox repo)
 data "azurerm_resource_group" "rg" {
-  name = "DefaultResourceGroup-EUS"
+  name = var.resource_group_name
 }
 
 # Create the Linux App Service Plan
