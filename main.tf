@@ -13,6 +13,9 @@ terraform {
   required_version = ">= 1.0.0"
 }
 
+data "azurerm_subscription" "current" {
+}
+
 # Variable for the resource group name
 variable "resource_group_name" {
   description = "Name of the existing Azure resource group"
@@ -67,4 +70,15 @@ resource "azurerm_app_service_source_control" "sourcecontrol" {
   branch             = "master"
   use_manual_integration = true
   use_mercurial      = false
+}
+
+# Output the default hostname of the webapp
+output "webapp_default_hostname" {
+  description = "Default hostname of the webapp"
+  value       = "https://${azurerm_linux_web_app.webapp.default_hostname}"
+}
+
+output "datadog_ci_command" {
+  description = "Command to run Datadog CI"
+  value       = "datadog-ci aas instrument -s ${data.azurerm_subscription.current.subscription_id} -g ${data.azurerm_resource_group.rg.name} -n ${resource.azurerm_linux_web_app.webapp.name} --service=dotnetcore-hello-world --env=lab"
 }
