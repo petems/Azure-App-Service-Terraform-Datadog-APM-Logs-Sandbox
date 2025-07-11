@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyTitle>Azure App Service Sample</AssemblyTitle>
+    <AssemblyDescription>Sample ASP.NET Core web application for Azure App Service with Datadog APM integration</AssemblyDescription>
+    <AssemblyProduct>Azure App Service Sample</AssemblyProduct>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
+    <Description>Sample ASP.NET Core web application demonstrating Azure App Service deployment with Terraform and Datadog APM integration</Description>
+    <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Datadog.Trace.Bundle" Version="3.20.1" />
+  </ItemGroup>
+
+</Project> 
