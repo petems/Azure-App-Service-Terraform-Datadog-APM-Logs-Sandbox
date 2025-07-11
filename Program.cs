@@ -1,5 +1,14 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging with scopes enabled
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole(opts =>
+{
+    opts.IncludeScopes = true; // Enable scopes for correlation identifiers
+});
+builder.Logging.AddDebug();
+builder.Logging.AddEventSourceLogger();
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 
