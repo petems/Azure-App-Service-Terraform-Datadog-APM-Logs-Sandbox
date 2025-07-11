@@ -1,0 +1,8 @@
+# Copy this file to terraform.tfvars and update with your actual values
+
+# Datadog API Key - Get this from your Datadog account
+# Navigate to: Organization Settings > API Keys
+datadog_api_key = "your-datadog-api-key-here"
+
+# Datadog Site - Common values: datadoghq.com, datadoghq.eu, us3.datadoghq.com, us5.datadoghq.com
+# datadog_site = "datadoghq.com" 
