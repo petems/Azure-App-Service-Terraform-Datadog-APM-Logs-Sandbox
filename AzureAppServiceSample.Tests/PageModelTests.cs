@@ -17,6 +17,15 @@ public class PageModelTests
         // Arrange
         var mockLogger = new Mock<ILogger<IndexModel>>();
         var indexModel = new IndexModel(mockLogger.Object);
+        
+        // Create a mock HttpContext
+        var httpContext = new DefaultHttpContext();
+        httpContext.TraceIdentifier = "test-trace-id";
+        
+        // Set up PageContext
+        var actionContext = new ActionContext(httpContext, new RouteData(), new PageActionDescriptor());
+        var pageContext = new PageContext(actionContext);
+        indexModel.PageContext = pageContext;
 
         // Act & Assert
         var exception = Record.Exception(() => indexModel.OnGet());
