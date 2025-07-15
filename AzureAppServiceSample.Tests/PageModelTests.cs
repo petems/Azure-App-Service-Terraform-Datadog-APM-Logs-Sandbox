@@ -1,104 +1,50 @@
 using Microsoft.Extensions.Logging;
 using Xunit;
-using AzureAppServiceSample.Pages;
-using Moq;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Routing;
 
 namespace AzureAppServiceSample.Tests;
 
-public class PageModelTests
+public class HttpTriggerFunctionTests
 {
     [Fact]
-    public void IndexModel_OnGet_ShouldNotThrow()
+    public void HttpTriggerFunction_Constructor_ShouldNotThrow()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<IndexModel>>();
-        var indexModel = new IndexModel(mockLogger.Object);
-
-        // Act & Assert
-        var exception = Record.Exception(() => indexModel.OnGet());
-        Assert.Null(exception);
-    }
-
-    [Fact]
-    public void PrivacyModel_OnGet_ShouldNotThrow()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<PrivacyModel>>();
-        var privacyModel = new PrivacyModel(mockLogger.Object);
-
-        // Act & Assert
-        var exception = Record.Exception(() => privacyModel.OnGet());
-        Assert.Null(exception);
-    }
-
-    [Fact]
-    public void ErrorModel_Properties_ShouldWork()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ErrorModel>>();
-        var errorModel = new ErrorModel(mockLogger.Object);
-
-        // Act
-        errorModel.RequestId = "test-request-id";
-
-        // Assert
-        Assert.Equal("test-request-id", errorModel.RequestId);
-        Assert.True(errorModel.ShowRequestId);
-    }
-
-    [Fact]
-    public void ErrorModel_ShowRequestId_ShouldBeFalse_WhenRequestIdIsNull()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ErrorModel>>();
-        var errorModel = new ErrorModel(mockLogger.Object);
-
-        // Act
-        errorModel.RequestId = null;
-
-        // Assert
-        Assert.False(errorModel.ShowRequestId);
-    }
-
-    [Fact]
-    public void ErrorModel_ShowRequestId_ShouldBeFalse_WhenRequestIdIsEmpty()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ErrorModel>>();
-        var errorModel = new ErrorModel(mockLogger.Object);
-
-        // Act
-        errorModel.RequestId = "";
-
-        // Assert
-        Assert.False(errorModel.ShowRequestId);
-    }
-
-    [Fact]
-    public void ErrorModel_OnGet_ShouldSetRequestId()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ErrorModel>>();
-        var errorModel = new ErrorModel(mockLogger.Object);
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         
-        // Create a mock HttpContext
-        var httpContext = new DefaultHttpContext();
-        httpContext.TraceIdentifier = "test-trace-id";
+        // Act & Assert
+        var function = new HttpTriggerFunction(loggerFactory);
+        Assert.NotNull(function);
         
-        // Set up PageContext
-        var actionContext = new ActionContext(httpContext, new RouteData(), new PageActionDescriptor());
-        var pageContext = new PageContext(actionContext);
-        errorModel.PageContext = pageContext;
+        // Cleanup
+        loggerFactory.Dispose();
+    }
 
+    [Fact]
+    public void HttpTriggerFunction_Constructor_WithNullLoggerFactory_ShouldThrow()
+    {
+        // Arrange
+        ILoggerFactory? nullLoggerFactory = null;
+        
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new HttpTriggerFunction(nullLoggerFactory!));
+    }
+
+    [Fact]
+    public void HttpTriggerFunction_CanBeInstantiatedMultipleTimes()
+    {
+        // Arrange
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        
         // Act
-        errorModel.OnGet();
-
+        var function1 = new HttpTriggerFunction(loggerFactory);
+        var function2 = new HttpTriggerFunction(loggerFactory);
+        
         // Assert
-        Assert.NotNull(errorModel.RequestId);
-        Assert.Equal("test-trace-id", errorModel.RequestId);
+        Assert.NotNull(function1);
+        Assert.NotNull(function2);
+        Assert.NotSame(function1, function2);
+        
+        // Cleanup
+        loggerFactory.Dispose();
     }
 } 

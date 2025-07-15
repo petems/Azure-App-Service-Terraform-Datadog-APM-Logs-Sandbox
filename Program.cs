@@ -1,28 +1,50 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Linq;
+using Serilog;
+using Serilog.Formatting.Compact;
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+var host = new HostBuilder()
+  .ConfigureFunctionsWorkerDefaults()
+  .ConfigureAppConfiguration(appConfigBuilder =>
+  {
+      appConfigBuilder
+          .AddJsonFile("local.settings.json", optional: true, reloadOnChange: false)
+          .AddUserSecrets<Program>(optional: true, reloadOnChange: false);
+  })
+  .ConfigureServices((context, services) =>
+  {
+      // Application Insights removed - using Datadog for APM (auto-injected)
+      // Serilog handles all logging requirements
+  })
+  .ConfigureLogging((hostingContext, logging) =>
+  {
+      // Clear all default providers to prevent double logging
+      logging.ClearProviders();
+      
+      // Configure Serilog as the primary logger
+      var serilogLogger = new LoggerConfiguration()
+          .MinimumLevel.Information()
+          .WriteTo.Console()
+          .WriteTo.File(
+              new CompactJsonFormatter(), 
+              "logs/serilog.log",
+              rollingInterval: RollingInterval.Day,
+              retainedFileCountLimit: 7,
+              buffered: false) // Disable buffering for immediate writes
+          .CreateLogger();
+      
+      logging.AddSerilog(serilogLogger);
+      
+      // Set minimum log level
+      logging.SetMinimumLevel(LogLevel.Information);
+  })
+  .Build();
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapRazorPages();
-
-app.Run();
+host.Run();
 
 // Make the Program class public for integration tests
 public partial class Program { } 

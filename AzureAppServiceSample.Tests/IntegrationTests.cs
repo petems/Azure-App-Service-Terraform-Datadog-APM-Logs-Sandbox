@@ -1,69 +1,60 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Net;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace AzureAppServiceSample.Tests;
 
-public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class IntegrationTests
 {
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public IntegrationTests(WebApplicationFactory<Program> factory)
+    [Fact]
+    public void HttpTriggerFunction_Integration_CanBeCreated()
     {
-        _factory = factory;
+        // Arrange
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        
+        // Act
+        var function = new HttpTriggerFunction(loggerFactory);
+        
+        // Assert
+        Assert.NotNull(function);
+        
+        // Cleanup
+        loggerFactory.Dispose();
     }
 
     [Fact]
-    public async Task Get_HomePage_ReturnsSuccessAndCorrectContentType()
+    public void HttpTriggerFunction_WithDifferentLogLevels()
     {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        var response = await client.GetAsync("/");
-
+        // Arrange & Act
+        var debugLoggerFactory = LoggerFactory.Create(builder => 
+            builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
+        var infoLoggerFactory = LoggerFactory.Create(builder => 
+            builder.AddConsole().SetMinimumLevel(LogLevel.Information));
+        
+        var debugFunction = new HttpTriggerFunction(debugLoggerFactory);
+        var infoFunction = new HttpTriggerFunction(infoLoggerFactory);
+        
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType?.ToString());
+        Assert.NotNull(debugFunction);
+        Assert.NotNull(infoFunction);
+        
+        // Cleanup
+        debugLoggerFactory.Dispose();
+        infoLoggerFactory.Dispose();
     }
 
     [Fact]
-    public async Task Get_PrivacyPage_ReturnsSuccess()
+    public void HttpTriggerFunction_LoggerFactory_CreatesLogger()
     {
         // Arrange
-        var client = _factory.CreateClient();
-
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        
         // Act
-        var response = await client.GetAsync("/Privacy");
-
+        var logger = loggerFactory.CreateLogger<HttpTriggerFunction>();
+        
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task Get_ErrorPage_ReturnsSuccess()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        var response = await client.GetAsync("/Error");
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType?.ToString());
-    }
-
-    [Fact]
-    public async Task Get_NonExistentPage_ReturnsNotFound()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        var response = await client.GetAsync("/NonExistentPage");
-
-        // Assert
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.NotNull(logger);
+        
+        // Cleanup
+        loggerFactory.Dispose();
     }
 } 
