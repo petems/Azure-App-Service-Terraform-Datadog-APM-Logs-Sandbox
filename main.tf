@@ -60,6 +60,26 @@ resource "azurerm_linux_web_app" "webapp" {
     application_stack {
       dotnet_version = "8.0"
     }
+    
+    # Datadog APM configuration
+    app_settings = {
+      "DD_ENV" = "lab"
+      "DD_SERVICE" = "azure-app-service-sample"
+      "DD_VERSION" = "1.0.0"
+      "DD_LOGS_INJECTION" = "true"
+      "DD_TRACE_SAMPLE_RATE" = "1.0"
+      "DD_PROFILING_ENABLED" = "true"
+      "DD_APM_ENABLED" = "true"
+      "DD_RUNTIME_METRICS_ENABLED" = "true"
+      "DD_TRACE_AGENT_URL" = "http://localhost:8126"
+      "DD_LOGS_ENABLED" = "true"
+      "DD_LOG_LEVEL" = "INFO"
+    }
+    
+    # Enable Datadog integration
+    application_stack {
+      dotnet_version = "8.0"
+    }
   }
 
   logs {
@@ -67,7 +87,7 @@ resource "azurerm_linux_web_app" "webapp" {
     failed_request_tracing  = true
     
     application_logs {
-      file_system_level = "Verbose"
+      file_system_level = "Information"
     }
     
     http_logs {
@@ -88,6 +108,18 @@ resource "azurerm_app_service_source_control" "sourcecontrol" {
   use_mercurial      = false
 }
 
+# Enable Datadog integration for the web app
+resource "azurerm_app_service_connection" "datadog" {
+  name               = "datadog-connection"
+  app_service_id     = azurerm_linux_web_app.webapp.id
+  target_resource_id = azurerm_linux_web_app.webapp.id
+  client_type        = "dotnet"
+  
+  auth_info {
+    auth_type = "systemAssignedIdentity"
+  }
+}
+
 # Output the default hostname of the webapp
 output "webapp_default_hostname" {
   description = "Default hostname of the webapp"
@@ -96,5 +128,5 @@ output "webapp_default_hostname" {
 
 output "datadog_ci_command" {
   description = "Command to run Datadog CI"
-  value       = "datadog-ci aas instrument -s ${data.azurerm_subscription.current.subscription_id} -g ${data.azurerm_resource_group.rg.name} -n ${resource.azurerm_linux_web_app.webapp.name} --service=dotnetcore-hello-world --env=lab"
+  value       = "datadog-ci aas instrument -s ${data.azurerm_subscription.current.subscription_id} -g ${data.azurerm_resource_group.rg.name} -n ${resource.azurerm_linux_web_app.webapp.name} --service=azure-app-service-sample --env=lab"
 }
